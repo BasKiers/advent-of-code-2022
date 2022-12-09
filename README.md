@@ -11,7 +11,7 @@
 
 <!--SOLUTIONS-->
 
-![Day](https://badgen.net/badge/01/%E2%98%86%E2%98%86/gray)
+[![Day](https://badgen.net/badge/01/%E2%98%85%E2%98%85/green)](src/day01)
 ![Day](https://badgen.net/badge/02/%E2%98%86%E2%98%86/gray)
 ![Day](https://badgen.net/badge/03/%E2%98%86%E2%98%86/gray)
 ![Day](https://badgen.net/badge/04/%E2%98%86%E2%98%86/gray)
@@ -69,9 +69,9 @@ pnpm start 1
 
 ```
 Day 01
-Time part 1: -
-Time part 2: -
-Both parts: -
+Time part 1: 0.401ms
+Time part 2: 0.419ms
+Both parts: 0.82ms
 ```
 
 ```
@@ -125,9 +125,9 @@ Both parts: -
 
 ```
 Day 09
-Time part 1: 83.054ms
-Time part 2: 340.462ms
-Both parts: 423.516ms
+Time part 1: 68.352ms
+Time part 2: 287.039ms
+Both parts: 355.39ms
 ```
 
 ```
@@ -243,8 +243,8 @@ Both parts: -
 ```
 
 ```
-Total stars: 2/50
-Total time: 423.516ms
+Total stars: 4/50
+Total time: 356.211ms
 ```
 
 <!--/RESULTS-->
