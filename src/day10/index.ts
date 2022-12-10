@@ -30,7 +30,12 @@ const parseInput = (rawInput: string) =>
 
 const toRegisterValues: (operations: [string, number][]) => number[] = F.flow(
   A.reduce([[1]] as number[][], (cycles, [operation, amount]) => {
-    const x = F.pipe(cycles, A.last, O.chain(A.last), O.getOrElse(0));
+    const x = F.pipe(
+      cycles,
+      A.last,
+      O.chain(A.last),
+      O.getOrElse(() => 0),
+    );
     switch (operation) {
       case "noop":
         return [...cycles, [x]];

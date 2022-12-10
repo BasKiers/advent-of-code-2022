@@ -19,58 +19,58 @@
     },
     {
       "part1": {
-        "solved": false,
-        "result": null,
+        "solved": true,
+        "result": "10404",
         "attempts": [],
-        "time": null
+        "time": 3.599667
       },
       "part2": {
-        "solved": false,
-        "result": null,
+        "solved": true,
+        "result": "10334",
         "attempts": [],
-        "time": null
+        "time": 3.0025
       }
     },
     {
       "part1": {
-        "solved": false,
-        "result": null,
+        "solved": true,
+        "result": "8105",
         "attempts": [],
-        "time": null
+        "time": 1.786083
       },
       "part2": {
-        "solved": false,
-        "result": null,
+        "solved": true,
+        "result": "2363",
         "attempts": [],
-        "time": null
+        "time": 1.226459
       }
     },
     {
       "part1": {
-        "solved": false,
-        "result": null,
+        "solved": true,
+        "result": "509",
         "attempts": [],
-        "time": null
+        "time": 6.536625
       },
       "part2": {
-        "solved": false,
-        "result": null,
+        "solved": true,
+        "result": "870",
         "attempts": [],
-        "time": null
+        "time": 4.168083
       }
     },
     {
       "part1": {
-        "solved": false,
-        "result": null,
+        "solved": true,
+        "result": "RFFFWBPNS",
         "attempts": [],
-        "time": null
+        "time": 33.832041
       },
       "part2": {
-        "solved": false,
-        "result": null,
+        "solved": true,
+        "result": "CQQBBJFCS",
         "attempts": [],
-        "time": null
+        "time": 3.656333
       }
     },
     {
@@ -131,16 +131,16 @@
     },
     {
       "part1": {
-        "solved": false,
-        "result": null,
+        "solved": true,
+        "result": "15220",
         "attempts": [],
-        "time": null
+        "time": 0.17825
       },
       "part2": {
-        "solved": false,
-        "result": null,
+        "solved": true,
+        "result": ".###..###...##..###....######.####..###.\n##.####......####........##...........##\n##.##.###...##..##..##....##...###.##...\n.##..###............####....####.....##.\n####................####...........##...\n#..####...#####.######....##..##........",
         "attempts": [],
-        "time": null
+        "time": 0.614459
       }
     },
     {
