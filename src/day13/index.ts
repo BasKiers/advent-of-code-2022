@@ -14,50 +14,6 @@ import {
 
 type RecursiveIntArray = (number | RecursiveIntArray)[];
 
-const charCount = (reg: RegExp) => (str: string) =>
-  (str.match(reg) || []).length;
-const openBracketCount = charCount(/\[/g);
-const closedBracketCount = charCount(/\]/g);
-
-const parseArrayString = (str: string): RecursiveIntArray =>
-  F.pipe(
-    str,
-    (str) => str.replace(/(^\[|\]$)/g, ""),
-    S.split(","),
-    readonlyArray.reduce(
-      { depth: 0, buffer: [], result: [] } as {
-        depth: number;
-        buffer: string[];
-        result: RecursiveIntArray;
-      },
-      (state, part) => {
-        if (!part) {
-          return state;
-        }
-
-        const openCount = openBracketCount(part);
-        if (state.depth + openCount === 0) {
-          return { ...state, result: [...state.result, parseInt(part)] };
-        }
-        const buffer = state.buffer.concat(part);
-
-        const closedCount = closedBracketCount(part);
-        const depth = state.depth + openCount - closedCount;
-        if (depth === 0) {
-          return {
-            ...state,
-            depth,
-            buffer: [],
-            result: [...state.result, parseArrayString(buffer.join(","))],
-          };
-        }
-
-        return { ...state, depth, buffer };
-      },
-    ),
-    ({ result }) => result,
-  );
-
 const parseInput = (rawInput: string) =>
   F.pipe(
     rawInput,
@@ -65,7 +21,11 @@ const parseInput = (rawInput: string) =>
     S.split("\n\n"),
     readonlyArray.toArray,
     A.map(
-      F.flow(S.split("\n"), readonlyArray.toArray, A.map(parseArrayString)),
+      F.flow(
+        S.split("\n"),
+        readonlyArray.toArray,
+        A.map((row) => JSON.parse(row)),
+      ),
     ),
   );
 
@@ -145,11 +105,6 @@ const part2 = (rawInput: string) => {
     monoid.concatAll(N.MonoidProduct),
   );
 };
-
-/**
- * [[]] | [[[]]]
- * [] | [[]]
- */
 
 run({
   part1: {
