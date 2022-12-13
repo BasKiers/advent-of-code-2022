@@ -7,6 +7,7 @@ import {
   function as F,
   number as N,
   option as O,
+  either as E,
   ord,
   ordering,
   monoid,
@@ -39,24 +40,26 @@ const ensureArray = <T>(elem: T): T[] =>
 const compareIntArray = (
   first: RecursiveIntArray,
   second: RecursiveIntArray,
-): ordering.Ordering => {
-  for (let i = 0; i < first.length && i < second.length; i++) {
-    const ordering = F.pipe(
-      [first[i], second[i]],
-      O.fromPredicate((pair): pair is [number, number] =>
-        pair.every(N.isNumber),
+): ordering.Ordering =>
+  F.pipe(
+    first,
+    A.zip(second),
+    A.map(
+      F.flow(
+        E.fromPredicate(
+          (pair): pair is [number, number] => A.every(N.isNumber)(pair),
+          A.map(ensureArray),
+        ),
+        E.map(([f, s]) => N.Ord.compare(f, s)),
+        E.orElse(([f, s]) => E.right(compareIntArray(f, s))),
+        O.fromEither,
+        O.filter((order) => order !== 0),
       ),
-      O.map(([f, s]) => N.Ord.compare(f, s)),
-      O.getOrElse(() =>
-        compareIntArray(ensureArray(first[i]), ensureArray(second[i])),
-      ),
-    );
-    if (ordering !== 0) {
-      return ordering;
-    }
-  }
-  return N.Ord.compare(first.length, second.length);
-};
+    ),
+    A.compact,
+    A.lookup(0),
+    O.getOrElse(() => N.Ord.compare(first.length, second.length)),
+  );
 
 const IntArrayOrd: ord.Ord<RecursiveIntArray> = {
   compare: compareIntArray,
@@ -66,42 +69,36 @@ const IntArrayOrd: ord.Ord<RecursiveIntArray> = {
 const part1 = (rawInput: string) => {
   const input = parseInput(rawInput);
 
-  const answer = F.pipe(
+  return F.pipe(
     input,
     A.map(([first, second]) => IntArrayOrd.compare(first, second)),
-    A.mapWithIndex((i, ordering) => (ordering === -1 ? i + 1 : 0)),
+    A.filterMapWithIndex((i, order) =>
+      F.pipe(
+        order,
+        O.fromPredicate((o) => o === -1),
+        O.map(() => i + 1),
+      ),
+    ),
     monoid.concatAll(N.MonoidSum),
   );
-
-  return answer;
 };
 
 const part2 = (rawInput: string) => {
   const input = parseInput(rawInput);
 
-  const dividerA: RecursiveIntArray = [[2]];
-  const dividerB: RecursiveIntArray = [[6]];
-
-  const sortedInput = F.pipe(
-    input,
-    A.flatten,
-    A.concat([dividerA, dividerB]),
-    A.sort(IntArrayOrd),
-  );
-
-  const indexA = F.pipe(
-    sortedInput,
-    A.findIndex((item) => IntArrayOrd.equals(item, dividerA)),
-  );
-  const indexB = F.pipe(
-    sortedInput,
-    A.findIndex((item) => IntArrayOrd.equals(item, dividerB)),
-  );
+  const dividers: RecursiveIntArray[] = [[[2]], [[6]]];
 
   return F.pipe(
-    [indexA, indexB],
-    A.compact,
-    A.map((index) => index + 1),
+    input,
+    A.flatten,
+    A.concat(dividers),
+    A.sort(IntArrayOrd),
+    A.filterMapWithIndex((i, item) =>
+      F.pipe(
+        O.of(i + 1),
+        O.filter(() => dividers.includes(item)),
+      ),
+    ),
     monoid.concatAll(N.MonoidProduct),
   );
 };
@@ -111,28 +108,28 @@ run({
     tests: [
       {
         input: `[1,1,3,1,1]
-      [1,1,5,1,1]
+[1,1,5,1,1]
 
-      [[1],[2,3,4]]
-      [[1],4]
+[[1],[2,3,4]]
+[[1],4]
 
-      [9]
-      [[8,7,6]]
+[9]
+[[8,7,6]]
 
-      [[4,4],4,4]
-      [[4,4],4,4,4]
+[[4,4],4,4]
+[[4,4],4,4,4]
 
-      [7,7,7,7]
-      [7,7,7]
+[7,7,7,7]
+[7,7,7]
 
-      []
-      [3]
+[]
+[3]
 
-      [[[]]]
-      [[]]
+[[[]]]
+[[]]
 
-      [1,[2,[3,[4,[5,6,7]]]],8,9]
-      [1,[2,[3,[4,[5,6,0]]]],8,9]`,
+[1,[2,[3,[4,[5,6,7]]]],8,9]
+[1,[2,[3,[4,[5,6,0]]]],8,9]`,
         expected: 13,
       },
     ],
