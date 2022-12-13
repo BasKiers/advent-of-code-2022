@@ -3,7 +3,6 @@ import run from "aocrunner";
 import {
   string as S,
   number as N,
-  nonEmptyArray as NEA,
   readonlyArray,
   array as A,
   function as F,
@@ -11,8 +10,8 @@ import {
   ord,
   set,
   map,
+  boolean,
 } from "fp-ts";
-import chalk from "chalk";
 
 interface PuzzleState {
   start: [number, number];
@@ -74,40 +73,6 @@ const sizeOrd: ord.Ord<[string, [[number, number], number]]> = {
 
 const getPathKey = (arr: number[]) => arr.join();
 
-const getPrintView =
-  (puzzle: PuzzleState) =>
-  (visited: Set<string>, costs: Map<string, [[number, number], number]>) =>
-    console.log(
-      F.pipe(
-        puzzle.heightMap,
-        A.mapWithIndex((y, row) =>
-          F.pipe(
-            row,
-            A.mapWithIndex((x) => {
-              if (positionOrd.equals([x, y], puzzle.end)) {
-                return chalk.blue(
-                  String(puzzle.heightMap[y][x]).padStart(2, " "),
-                );
-              } else if (visited.has(getPathKey([x, y]))) {
-                return chalk.green(
-                  String(puzzle.heightMap[y][x]).padStart(2, " "),
-                );
-              } else if (costs.has(getPathKey([x, y]))) {
-                return chalk.white(
-                  String(puzzle.heightMap[y][x]).padStart(2, " "),
-                );
-              }
-              return chalk.red(String(puzzle.heightMap[y][x]).padStart(2, " "));
-            }),
-            (row) => row.join(" "),
-          ),
-        ),
-        (view) => view.join("\n\n").concat("\n\n"),
-      ),
-    );
-
-const PRINT_VIEW_ENABLED = false;
-
 const getShortestPath = (
   puzzle: PuzzleState,
   visited: Set<string> = new Set(),
@@ -115,60 +80,69 @@ const getShortestPath = (
     [getPathKey(puzzle.start), [puzzle.start, 0]],
   ]),
 ): O.Option<number> => {
-  const printView = getPrintView(puzzle);
-
-  let shortestPath: O.Option<number> = O.none;
-  let nextNode: O.Option<[string, [[number, number], number]]>;
+  const endKey = getPathKey(puzzle.end);
   do {
-    nextNode = F.pipe(
-      costs,
-      map.toArray(S.Ord),
-      A.sort(sizeOrd),
-      A.lookup(0),
-      O.chain((node) => {
-        const [key, [[x, y], cost]] = node;
-        if (PRINT_VIEW_ENABLED) {
-          printView(visited, costs);
-        }
-        if (positionOrd.equals(puzzle.end, [x, y])) {
-          shortestPath = O.some(cost);
-          return O.none;
-        }
-        visited = set.insert(S.Eq)(key)(visited);
-        costs = F.pipe(
-          [
-            [x - 1, y],
-            [x + 1, y],
-            [x, y - 1],
-            [x, y + 1],
-          ] as [number, number][],
-          A.filter(
-            ([px, py]) =>
-              py >= 0 &&
-              py < puzzle.heightMap.length &&
-              px >= 0 &&
-              px < puzzle.heightMap[py].length &&
-              puzzle.heightMap[py][px] - puzzle.heightMap[y][x] <= 1 &&
-              !visited.has(getPathKey([px, py])),
-          ),
-          A.map(([px, py]): [string, [[number, number], number]] => [
-            getPathKey([px, py]),
-            [[px, py], cost + 1],
-          ]),
-          (entries) =>
-            new Map([
-              ...Array.from(costs.entries()).filter(
-                ([costKey]) => costKey !== key,
+    costs = F.pipe(costs, map.toArray(S.Ord), A.sort(sizeOrd), (entries) =>
+      F.pipe(
+        entries,
+        A.lookup(0),
+        O.map(([key, [[x, y], cost]]) => {
+          visited = set.insert(S.Eq)(key)(visited);
+          return F.pipe(
+            [
+              [x - 1, y],
+              [x + 1, y],
+              [x, y - 1],
+              [x, y + 1],
+            ] as [number, number][],
+            A.filter(
+              F.flow(
+                O.of,
+                O.filter(([, py]) => py >= 0 && py < puzzle.heightMap.length),
+                O.filter(
+                  ([px, py]) => px >= 0 && px < puzzle.heightMap[py].length,
+                ),
+                O.filter(
+                  ([px, py]) =>
+                    puzzle.heightMap[py][px] - puzzle.heightMap[y][x] <= 1,
+                ),
+                O.filter(
+                  F.flow(
+                    getPathKey,
+                    (k) => visited.has(k),
+                    boolean.BooleanAlgebra.not,
+                  ),
+                ),
+                O.isSome,
               ),
-              ...entries,
+            ),
+            A.map(([px, py]): [string, [[number, number], number]] => [
+              getPathKey([px, py]),
+              [[px, py], cost + 1],
             ]),
-        );
-        return O.some(node);
-      }),
+            A.concat(entries),
+            (entries) => new Map(entries),
+            map.deleteAt(S.Eq)(key),
+          );
+        }),
+        O.getOrElse(() => new Map<string, [[number, number], number]>()),
+      ),
     );
-  } while (O.isSome(nextNode));
+  } while (
+    F.pipe(
+      costs,
+      O.of,
+      O.filter(F.flow(map.isEmpty, boolean.BooleanAlgebra.not)),
+      O.filter(F.flow(map.member(S.Eq)(endKey), boolean.BooleanAlgebra.not)),
+      O.isSome,
+    )
+  );
 
-  return shortestPath;
+  return F.pipe(
+    costs,
+    map.lookup(S.Eq)(endKey),
+    O.map(([, cost]) => cost),
+  );
 };
 
 const part1 = (rawInput: string) => {
