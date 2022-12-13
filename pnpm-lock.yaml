@@ -3,10 +3,12 @@ lockfileVersion: 5.4
 specifiers:
   '@types/node': ^16.11.6
   aocrunner: ^1.9.6
+  chalk: ^5.2.0
   fp-ts: ^2.13.1
   prettier: ^2.8.0
 
 dependencies:
+  chalk: 5.2.0
   fp-ts: 2.13.1
 
 devDependencies:
@@ -119,6 +121,11 @@ packages:
     dependencies:
       fill-range: 7.0.1
     dev: true
+
+  /chalk/5.2.0:
+    resolution: {integrity: sha512-ree3Gqw/nazQAPuJJEy+avdl7QfZMcUvmHIKgEZkGL+xOBzRvup5Hxo6LHuMceSxOabuJLJm5Yp/92R9eMmMvA==}
+    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
+    dev: false
 
   /chokidar/3.5.3:
     resolution: {integrity: sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==}
