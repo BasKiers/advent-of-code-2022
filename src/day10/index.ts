@@ -81,8 +81,6 @@ const part2 = (rawInput: string) => {
     (arr) => arr.join("\n"),
   );
 
-  console.log(lines);
-
   return lines;
 };
 

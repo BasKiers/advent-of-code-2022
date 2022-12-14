@@ -64,7 +64,6 @@ const parseInput = (rawInput: string) =>
     ),
   );
 
-const positionOrd = ord.tuple(N.Ord, N.Ord);
 const sizeOrd: ord.Ord<[string, [[number, number], number]]> = {
   equals: ([, [, first]], [, [, second]]) => first === second,
   compare: ([, [, first]], [, [, second]]) =>
