@@ -8,7 +8,6 @@ import {
   monoid,
   number as N,
   map,
-  eq,
   string,
 } from "fp-ts";
 

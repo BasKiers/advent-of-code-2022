@@ -8,7 +8,6 @@ import {
   number as N,
   nonEmptyArray as NEA,
   ord,
-  monoid,
 } from "fp-ts";
 
 const parseInput = (rawInput: string) =>

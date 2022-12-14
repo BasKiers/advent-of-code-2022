@@ -10,7 +10,6 @@ import {
   nonEmptyArray as NEA,
   option as O,
   set,
-  boolean,
 } from "fp-ts";
 
 const parseInput = (rawInput: string) =>
