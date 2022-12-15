@@ -3,10 +3,10 @@ import run from "aocrunner";
 import {
   string as S,
   readonlyArray,
+  nonEmptyArray as NEA,
   array as A,
   function as F,
   option as O,
-  nonEmptyArray as NEA,
   monoid,
 } from "fp-ts";
 
@@ -82,29 +82,25 @@ const getNextBoardState =
 const part1 = (rawInput: string) => {
   const [board, moves] = parseInput(rawInput);
 
-  const answer = F.pipe(
+  return F.pipe(
     moves,
     A.reduce(board, getNextBoardState(A.reverse)),
     A.map(A.lookup(0)),
     A.compact,
     (arr) => arr.join(""),
   );
-
-  return answer;
 };
 
 const part2 = (rawInput: string) => {
   const [board, moves] = parseInput(rawInput);
 
-  const answer = F.pipe(
+  return F.pipe(
     moves,
     A.reduce(board, getNextBoardState()),
     A.map(A.lookup(0)),
     A.compact,
     (arr) => arr.join(""),
   );
-
-  return answer;
 };
 
 run({
@@ -143,5 +139,5 @@ move 1 from 1 to 2`,
     solution: part2,
   },
   trimTestInputs: false,
-  onlyTests: false,
+  onlyTests: true,
 });

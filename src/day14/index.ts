@@ -179,28 +179,24 @@ const getSandLocationsWhile =
     return [...sandLocationMap.values()];
   };
 
-const part1 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  return F.pipe(
-    input,
+const part1 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
     toRockLocations,
     getSandLocationsWhile(([, y], abyss) => y !== abyss),
     A.size,
     (size) => size - 1,
   );
-};
 
-const part2 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  return F.pipe(
-    input,
+const part2 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
     toRockLocations,
     getSandLocationsWhile(([, y]) => y !== 0),
     A.size,
   );
-};
 
 run({
   part1: {

@@ -48,41 +48,34 @@ const toRegisterValues: (operations: [string, number][]) => number[] = F.flow(
   A.flatten,
 );
 
-const part1 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  const answer = F.pipe(
-    input,
+const part1 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
     toRegisterValues,
     A.dropLeft(19),
     A.chunksOf(40),
     A.map(NEA.head),
-    A.reduceWithIndex(0, (i, sum, value) => {
-      const index = i * 40 + 20;
-      return sum + value * index;
-    }),
+    A.reduceWithIndex(0, (i, sum, value) => (i * 40 + 20) * value + sum),
   );
-
-  return answer;
-};
-
-const part2 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  const registerValues = F.pipe(input, toRegisterValues);
-
-  const lines = F.pipe(
-    A.zip(NEA.range(0, 239), registerValues),
-    A.map(([cycle, position]) =>
-      cycle % 40 >= position && cycle % 40 < position + 3 ? "#" : ".",
+const part2 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
+    toRegisterValues,
+    A.mapWithIndex((pointer, spriteLocation) =>
+      F.pipe(
+        O.some("#"),
+        O.filter(() => pointer % 40 >= spriteLocation - 1),
+        O.filter(() => pointer % 40 < spriteLocation + 2),
+        O.getOrElse(() => "."),
+      ),
     ),
     A.chunksOf(40),
+    A.dropRight(1),
     A.map((arr) => arr.join("")),
     (arr) => arr.join("\n"),
   );
-
-  return lines;
-};
 
 run({
   part1: {
@@ -401,5 +394,5 @@ noop`,
     solution: part2,
   },
   trimTestInputs: true,
-  onlyTests: false,
+  onlyTests: true,
 });

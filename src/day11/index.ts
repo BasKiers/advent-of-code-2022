@@ -7,6 +7,7 @@ import {
   function as F,
   number as N,
   nonEmptyArray as NEA,
+  monoid,
 } from "fp-ts";
 
 enum OperatorKey {
@@ -79,7 +80,7 @@ const simulateRounds = (
   const maxValue = F.pipe(
     state,
     A.map(({ test: [divisible] }) => divisible),
-    A.reduce(N.MonoidProduct.empty, N.MonoidProduct.concat),
+    monoid.concatAll(N.MonoidProduct),
   );
   F.pipe(
     NEA.range(1, rounds),

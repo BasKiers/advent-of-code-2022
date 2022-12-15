@@ -66,11 +66,10 @@ const IntArrayOrd: ord.Ord<RecursiveIntArray> = {
   equals: (first, second) => compareIntArray(first, second) === 0,
 };
 
-const part1 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  return F.pipe(
-    input,
+const part1 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
     A.map(([first, second]) => IntArrayOrd.compare(first, second)),
     A.filterMapWithIndex((i, order) =>
       F.pipe(
@@ -81,15 +80,13 @@ const part1 = (rawInput: string) => {
     ),
     monoid.concatAll(N.MonoidSum),
   );
-};
 
 const part2 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
   const dividers: RecursiveIntArray[] = [[[2]], [[6]]];
 
   return F.pipe(
-    input,
+    rawInput,
+    parseInput,
     A.flatten,
     A.concat(dividers),
     A.sort(IntArrayOrd),

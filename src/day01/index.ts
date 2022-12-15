@@ -2,7 +2,7 @@ import run from "aocrunner";
 
 import {
   string as S,
-  readonlyArray as REA,
+  readonlyArray as ROA,
   array as A,
   number as N,
   function as F,
@@ -15,15 +15,8 @@ const parseInput = (rawInput: string) =>
     rawInput,
     S.trim,
     S.split("\n\n"),
-    REA.toArray,
-    A.map(
-      F.flow(
-        S.trim,
-        S.split("\n"),
-        REA.toArray,
-        A.map((str: string) => parseInt(str)),
-      ),
-    ),
+    ROA.toArray,
+    A.map(F.flow(S.trim, S.split("\n"), ROA.toArray, A.map(parseInt))),
   );
 
 const toSortedCalories = F.flow(
@@ -31,31 +24,23 @@ const toSortedCalories = F.flow(
   A.sort(N.Ord),
 );
 
-const part1 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  const answer = F.pipe(
-    input,
+const part1 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
     toSortedCalories,
     A.last,
     O.getOrElse(() => 0),
   );
 
-  return answer;
-};
-
-const part2 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  const answer = F.pipe(
-    input,
+const part2 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
     toSortedCalories,
     A.takeRight(3),
     monoid.concatAll(N.MonoidSum),
   );
-
-  return answer;
-};
 
 run({
   part1: {

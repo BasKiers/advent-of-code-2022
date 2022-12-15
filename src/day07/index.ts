@@ -2,7 +2,7 @@ import run from "aocrunner";
 
 import {
   string as S,
-  readonlyArray,
+  readonlyArray as ROA,
   nonEmptyArray as NEA,
   array as A,
   number as N,
@@ -17,14 +17,14 @@ const parseInput = (rawInput: string) =>
     rawInput,
     S.trim,
     S.split("$"),
-    readonlyArray.toArray,
+    ROA.toArray,
     A.dropLeft(1),
     A.map(
       F.flow(
         S.trim,
         S.split("\n"),
-        readonlyArray.toArray,
-        A.map(F.flow(S.split(" "), readonlyArray.toArray)),
+        ROA.toArray,
+        A.map(F.flow(S.split(" "), ROA.toArray)),
       ),
     ),
   );
@@ -46,28 +46,37 @@ const toDirSizeMap = (commands: string[][][]): Map<string, number> =>
       ({ cwd, dirs }, [[name, param], ...output]) => {
         switch (name) {
           case "cd":
-            const newCwd = F.pipe(
-              cwd,
-              S.split("/"),
-              readonlyArray.toArray,
-              param === ".." ? A.dropRight(1) : A.concat([param]),
-              (cwdParts) => cwdParts.join("/"),
-            );
-            return { cwd: newCwd, dirs };
+            return {
+              cwd: F.pipe(
+                cwd,
+                S.split("/"),
+                param === ".." ? ROA.dropRight(1) : ROA.concat([param]),
+                (cwdParts) => cwdParts.join("/"),
+              ),
+              dirs,
+            };
           case "ls":
-            const size = F.pipe(
-              output,
-              A.map(
-                F.flow(
-                  A.lookup(0),
-                  O.map((size) => parseInt(size)),
-                  O.filter((size) => !Number.isNaN(size)),
+            return {
+              cwd,
+              dirs: F.pipe(
+                dirs,
+                map.upsertAt(S.Eq)(
+                  cwd,
+                  F.pipe(
+                    output,
+                    A.map(
+                      F.flow(
+                        A.lookup(0),
+                        O.map(parseInt),
+                        O.filter((size) => !Number.isNaN(size)),
+                      ),
+                    ),
+                    A.compact,
+                    monoid.concatAll(N.MonoidSum),
+                  ),
                 ),
               ),
-              A.compact,
-              monoid.concatAll(N.MonoidSum),
-            );
-            dirs.set(cwd, size);
+            };
         }
         return { cwd, dirs };
       },
@@ -87,17 +96,15 @@ const toDirSizeMap = (commands: string[][][]): Map<string, number> =>
     (entries) => new Map(entries),
   );
 
-const part1 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  return F.pipe(
-    input,
+const part1 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
     toDirSizeMap,
     map.values(N.Ord),
     A.takeLeftWhile((size) => size < 100000),
     monoid.concatAll(N.MonoidSum),
   );
-};
 
 const part2 = (rawInput: string) => {
   const input = parseInput(rawInput);

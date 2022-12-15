@@ -147,44 +147,32 @@ const getShortestPath = (
 const part1 = (rawInput: string) => {
   const puzzle = parseInput(rawInput);
 
-  const shortestPath = F.pipe(
+  return F.pipe(
     puzzle,
     getShortestPath,
     O.getOrElse(() => Number.MAX_VALUE),
   );
-
-  return shortestPath;
 };
 
 const part2 = (rawInput: string) => {
   const puzzle = parseInput(rawInput);
 
-  const startPositions = F.pipe(
+  return F.pipe(
     puzzle.heightMap,
     A.mapWithIndex((y, row) =>
-      F.pipe(
-        row,
-        A.mapWithIndex((x, value): [[number, number], number] => [
-          [x, y],
-          value,
-        ]),
-      ),
+      A.mapWithIndex((x, value: number): [[number, number], number] => [
+        [x, y],
+        value,
+      ])(row),
     ),
     A.flatten,
     A.filter(([, value]) => value === 0),
-    A.map(([position]) => position),
-  );
-
-  const shortestPath = F.pipe(
-    startPositions,
-    A.map((start) => F.pipe({ ...puzzle, start }, getShortestPath)),
+    A.map(([start]) => F.pipe({ ...puzzle, start }, getShortestPath)),
     A.compact,
     A.sort(N.Ord),
     A.lookup(0),
     O.getOrElse(() => Number.MAX_VALUE),
   );
-
-  return shortestPath;
 };
 
 run({

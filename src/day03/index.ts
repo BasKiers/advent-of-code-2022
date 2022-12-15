@@ -27,41 +27,26 @@ const monoidIntersection: monoid.Monoid<string[]> = {
   empty: [],
 };
 
-const toIntersectionScoreTotal: (intersections: string[][]) => number = F.flow(
-  A.map(F.flow(A.lookup(0))),
+const toIntersectionScoreTotal: (
+  intersections: NEA.NonEmptyArray<string[]>[],
+) => number = F.flow(
+  A.map(NEA.concatAll(monoidIntersection)),
+  A.map(A.lookup(0)),
   A.compact,
   A.map(strToScore),
   monoid.concatAll(N.MonoidSum),
 );
 
-const part1 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  const score = F.pipe(
-    input,
-    A.map((str): [string[], string[]] => [
-      str.slice(0, str.length / 2),
-      str.slice(str.length / 2),
-    ]),
-    A.map(F.flow(NEA.concatAll(monoidIntersection))),
+const part1 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
+    A.map((str) => A.splitAt(str.length / 2)(str)),
     toIntersectionScoreTotal,
   );
 
-  return score;
-};
-
-const part2 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  const score = F.pipe(
-    input,
-    A.chunksOf(3),
-    A.map(F.flow(NEA.concatAll(monoidIntersection))),
-    toIntersectionScoreTotal,
-  );
-
-  return score;
-};
+const part2 = (rawInput: string) =>
+  F.pipe(rawInput, parseInput, A.chunksOf(3), toIntersectionScoreTotal);
 
 run({
   part1: {

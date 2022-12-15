@@ -2,10 +2,11 @@ import run from "aocrunner";
 
 import {
   string as S,
-  readonlyArray as REA,
+  readonlyArray as ROA,
   nonEmptyArray as NEA,
   array as A,
   function as F,
+  option as O,
   monoid,
   number,
 } from "fp-ts";
@@ -15,14 +16,14 @@ const parseInput = (rawInput: string) =>
     rawInput,
     S.trim,
     S.split("\n"),
-    REA.toArray,
+    ROA.toArray,
     A.map(
       F.flow(
         S.trim,
         S.split(","),
-        REA.toArray,
+        ROA.toArray,
         A.map(
-          F.flow(S.split("-"), REA.toArray, A.map(parseInt), ([start, end]) =>
+          F.flow(S.split("-"), ROA.toArray, A.map(parseInt), ([start, end]) =>
             NEA.range(start, end),
           ),
         ),
@@ -49,37 +50,29 @@ const toIntersectionLengths: (
 const part1 = (rawInput: string) => {
   const input = parseInput(rawInput);
 
-  const intersectionLengths = F.pipe(input, toIntersectionLengths);
-  const minTaskLengths = F.pipe(
-    input,
-    A.map(
-      F.flow(
-        NEA.map((a) => a.length),
-        (lengths) => Math.min(...lengths),
-      ),
-    ),
-  );
-  const fullyIntersectedRanges = F.pipe(
-    A.zipWith(intersectionLengths, minTaskLengths, (a, b) => a === b),
-    A.filter(Boolean),
-    (intersections) => intersections.length,
-  );
-
-  return fullyIntersectedRanges;
-};
-
-const part2 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  const intersectedRanges = F.pipe(
+  return F.pipe(
     input,
     toIntersectionLengths,
-    A.filter(Boolean),
-    (intersections) => intersections.length,
+    (intersections) =>
+      A.zipWith(intersections, input, (a, [b1, b2]) =>
+        F.pipe(
+          Math.min(b1.length, b2.length),
+          O.fromPredicate((b) => b === a),
+        ),
+      ),
+    A.compact,
+    A.size,
   );
-
-  return intersectedRanges;
 };
+
+const part2 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
+    toIntersectionLengths,
+    A.filter(Boolean),
+    A.size,
+  );
 
 run({
   part1: {

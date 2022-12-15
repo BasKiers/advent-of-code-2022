@@ -11,59 +11,51 @@ import {
   set,
 } from "fp-ts";
 
+const parseInput = (rawInput: string) =>
+  F.pipe(rawInput, S.trim, S.split(""), readonlyArray.toArray);
+
 const toWindows =
   (windowSize: number) =>
-  <T>(arr: T[]): T[][] => {
-    const startWindow = A.map(A.of)(arr);
-    return F.pipe(
+  <T>(arr: T[]): T[][] =>
+    F.pipe(
       NEA.range(0, windowSize - 1),
       NEA.foldMap({
         concat: (a, b) => F.pipe(A.zip(a, b), A.map(A.flatten)),
-      } as semigroup.Semigroup<T[][]>)((skip) => A.dropLeft(skip)(startWindow)),
+      } as semigroup.Semigroup<T[][]>)((skip) =>
+        F.pipe(arr, A.map(A.of), A.dropLeft(skip)),
+      ),
     );
-  };
-
-const parseInput = (rawInput: string) =>
-  F.pipe(rawInput, S.trim, S.split(""), readonlyArray.toArray);
 
 const toIndexAfterDistinctItems =
   (distinctItemCount: number) => (array: string[]) =>
     F.pipe(
       array,
       toWindows(distinctItemCount),
-      A.findIndex((window) =>
-        F.pipe(
-          window,
+      A.findIndex(
+        F.flow(
           set.fromArray(S.Eq),
-          (windowSet) => windowSet.size === window.length,
+          set.size,
+          (uniqueElems) => uniqueElems === distinctItemCount,
         ),
       ),
       O.map((windowIndex) => windowIndex + distinctItemCount),
     );
 
-const part1 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  const answer = F.pipe(
-    input,
+const part1 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
     toIndexAfterDistinctItems(4),
     O.getOrElse(() => 0),
   );
 
-  return answer;
-};
-
-const part2 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  const answer = F.pipe(
-    input,
+const part2 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
     toIndexAfterDistinctItems(14),
     O.getOrElse(() => 0),
   );
-
-  return answer;
-};
 
 run({
   part1: {

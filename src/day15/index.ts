@@ -35,6 +35,34 @@ const xOrd: ord.Ord<[number, number, number, number]> = {
   compare: ([x1], [x2]) => N.Ord.compare(x1, x2),
 };
 
+const groupRanges: (
+  as: [number, number, number, number][],
+) => [number, number, number, number][] = A.chop((as) => {
+  let max = as[0][0];
+  return F.pipe(
+    as,
+    A.spanLeft(
+      F.flow(
+        O.of,
+        O.filter(([start]) => max - start >= -1),
+        O.map((an) => {
+          max = Math.max(max, an[2]);
+          return an;
+        }),
+        O.isSome,
+      ),
+    ),
+    ({ init, rest }) => [
+      F.pipe(
+        A.head(init),
+        O.map(([x, y]): [number, number, number, number] => [x, y, max, y]),
+        O.getOrElse((): [number, number, number, number] => [0, 0, 0, 0]),
+      ),
+      rest,
+    ],
+  );
+});
+
 const mergeOverlappingRanges =
   (minVal: number = 0, maxVal: number = 4000000) =>
   (ranges: [number, number, number, number][]) =>
@@ -42,38 +70,7 @@ const mergeOverlappingRanges =
       ranges,
       A.sort(xOrd),
       A.filter(([x1, , x2]) => x2 > minVal && x1 < maxVal),
-      A.reduce(
-        [] as [number, number, number, number][],
-        (emptyZones, [x1, y, x2]) =>
-          F.pipe(
-            emptyZones,
-            A.dropRight(1),
-            A.concat(
-              F.pipe(
-                emptyZones,
-                A.last,
-                O.map(([x3, , x4]) =>
-                  F.pipe(
-                    [x3, x4],
-                    O.fromPredicate(([, end]) => end - x1 >= -1),
-                    O.map(
-                      ([start, end]): [number, number, number, number][] => [
-                        [start, y, Math.max(end, x2), y],
-                      ],
-                    ),
-                    O.getOrElse((): [number, number, number, number][] => [
-                      [x3, y, x4, y],
-                      [x1, y, x2, y],
-                    ]),
-                  ),
-                ),
-                O.getOrElse((): [number, number, number, number][] => [
-                  [x1, y, x2, y],
-                ]),
-              ),
-            ),
-          ),
-      ),
+      groupRanges,
     );
 
 const getClearPositions = (

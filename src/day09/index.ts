@@ -2,12 +2,15 @@ import run from "aocrunner";
 
 import {
   string as S,
-  readonlyArray,
+  readonlyArray as ROA,
   array as A,
   function as F,
   number as N,
   nonEmptyArray as NEA,
+  option as O,
   ord,
+  monoid,
+  set,
 } from "fp-ts";
 
 const parseInput = (rawInput: string) =>
@@ -15,8 +18,8 @@ const parseInput = (rawInput: string) =>
     rawInput,
     S.trim,
     S.split("\n"),
-    readonlyArray.map(F.flow(S.trim, S.split(" "))),
-    readonlyArray.reduce([] as [string, number][], (acc, [str, num]) => {
+    ROA.map(F.flow(S.trim, S.split(" "))),
+    ROA.reduce([] as [string, number][], (acc, [str, num]) => {
       acc.push([str, parseInt(num)]);
       return acc;
     }),
@@ -43,93 +46,86 @@ const getDeltasForMovement = ([direction, amount]: [string, number]): [
 const calculateNextCoordinate =
   (
     zipCoordinates: (
-      a: [number, number],
-      b: [number, number],
-    ) => [number, number],
+      a: readonly [number, number],
+      b: readonly [number, number],
+    ) => readonly [number, number],
   ) =>
   (
-    coordinates: NEA.NonEmptyArray<[number, number]>,
-    newCoordinate: [number, number],
-  ): NEA.NonEmptyArray<[number, number]> =>
+    coordinates: NEA.NonEmptyArray<readonly [number, number]>,
+    coordinateDelta: readonly [number, number],
+  ): NEA.NonEmptyArray<readonly [number, number]> =>
     F.pipe(
       coordinates,
       NEA.head,
-      (lastCoordinate) => [zipCoordinates(lastCoordinate, newCoordinate)],
+      (lastCoordinate) => [zipCoordinates(lastCoordinate, coordinateDelta)],
       NEA.concat(coordinates),
     );
 
 const getCoordinatesForMovements = (
   movements: [string, number][],
-): [number, number][] => {
+): (readonly [number, number])[] => {
   return F.pipe(
     movements,
     A.chain(getDeltasForMovement),
     A.reduce(
-      [[0, 0]] as NEA.NonEmptyArray<[number, number]>,
-      calculateNextCoordinate(([x1, y1], [x2, y2]) => [x1 + x2, y1 + y2]),
+      [[0, 0]] as NEA.NonEmptyArray<readonly [number, number]>,
+      calculateNextCoordinate(monoid.tuple(N.MonoidSum, N.MonoidSum).concat),
     ),
     A.reverse,
   );
 };
 
 const getCoordinatesForFollower = (
-  coordinates: [number, number][],
-): [number, number][] =>
+  coordinates: (readonly [number, number])[],
+): (readonly [number, number])[] =>
   F.pipe(
     coordinates,
     A.reduce(
       [[0, 0]] as NEA.NonEmptyArray<[number, number]>,
-      calculateNextCoordinate(([x1, y1], [x2, y2]) => {
-        const xDiff = x2 - x1;
-        const yDiff = y2 - y1;
-        if (Math.abs(xDiff) <= 1 && Math.abs(yDiff) <= 1) {
-          return [x1, y1];
-        }
-        const newVal = F.flow(
-          ord.clamp(N.Ord)(-1, 1),
-          (a) => (b: number) => a + b,
-        );
-        return [newVal(xDiff)(x1), newVal(yDiff)(y1)];
-      }),
+      calculateNextCoordinate((tail, head) =>
+        F.pipe(
+          ROA.zipWith(head, tail, (h, t) => h - t),
+          O.fromPredicate(ROA.some((l) => Math.abs(l) > 1)),
+          O.map(F.flow(ROA.map(ord.clamp(N.Ord)(-1, 1)))),
+          O.map(([x, y]) =>
+            monoid.tuple(N.MonoidSum, N.MonoidSum).concat([x, y], tail),
+          ),
+          O.getOrElse(() => tail),
+        ),
+      ),
     ),
     A.reverse,
     A.dropLeft(1),
   );
 
-const getUniqueCoordinateCount = (coordinates: [number, number][]): number =>
+const getUniqueCoordinateCount = (
+  coordinates: (readonly [number, number])[],
+): number =>
   F.pipe(
     coordinates,
-    A.map(([x, y]) => `x${x}y${y}`),
-    (locationNames) => new Set(locationNames),
-    (locationSet) => new Array(...locationSet.values()).length,
+    A.map((c) => c.join(",")),
+    set.fromArray(S.Eq),
+    set.size,
   );
 
-const part1 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  const headCoordinates = getCoordinatesForMovements(input);
-  const followerCoordinates = getCoordinatesForFollower(headCoordinates);
-  const uniqueCoordinates = getUniqueCoordinateCount(followerCoordinates);
-
-  return uniqueCoordinates;
-};
-
-const part2 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  let headCoordinates = getCoordinatesForMovements(input);
-
-  const tailCoordinates = F.pipe(
-    NEA.range(1, 9),
-    NEA.reduce(headCoordinates, (coordinates) =>
-      getCoordinatesForFollower(coordinates),
-    ),
+const part1 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
+    getCoordinatesForMovements,
+    getCoordinatesForFollower,
+    getUniqueCoordinateCount,
   );
 
-  const uniqueCoordinates = getUniqueCoordinateCount(tailCoordinates);
-
-  return uniqueCoordinates;
-};
+const part2 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
+    getCoordinatesForMovements,
+    (headCoordinates) =>
+      NEA.reduce(headCoordinates, getCoordinatesForFollower)(NEA.range(1, 9)),
+    getUniqueCoordinateCount,
+  );
 
 run({
   part1: {
@@ -165,5 +161,5 @@ U 20`,
     solution: part2,
   },
   trimTestInputs: true,
-  onlyTests: false,
+  onlyTests: true,
 });

@@ -7,64 +7,68 @@ import {
   function as F,
   monoid,
   number as N,
+  option as O,
   map,
-  string,
 } from "fp-ts";
 
 const parseInput = (rawInput: string) =>
-  F.pipe(
-    rawInput,
-    S.trim,
-    S.split("\n"),
-    readonlyArray.toArray,
-    A.map(F.flow(S.trim, S.split(" "), readonlyArray.toArray)),
-  );
+  F.pipe(rawInput, S.trim, S.split("\n"), readonlyArray.toArray);
+
+const SCORE = {
+  L: 0,
+  D: 3,
+  W: 6,
+  ROCK: 1,
+  PAPER: 2,
+  SCISSORS: 3,
+} as const;
 
 const simpleStrategyScoreMap = new Map<string, number>([
-  ["A,X", 3 + 1],
-  ["A,Y", 6 + 2],
-  ["A,Z", 0 + 3],
-  ["B,X", 0 + 1],
-  ["B,Y", 3 + 2],
-  ["B,Z", 6 + 3],
-  ["C,X", 6 + 1],
-  ["C,Y", 0 + 2],
-  ["C,Z", 3 + 3],
+  ["A X", SCORE.D + SCORE.ROCK],
+  ["A Y", SCORE.W + SCORE.PAPER],
+  ["A Z", SCORE.L + SCORE.SCISSORS],
+  ["B X", SCORE.L + SCORE.ROCK],
+  ["B Y", SCORE.D + SCORE.PAPER],
+  ["B Z", SCORE.W + SCORE.SCISSORS],
+  ["C X", SCORE.W + SCORE.ROCK],
+  ["C Y", SCORE.L + SCORE.PAPER],
+  ["C Z", SCORE.D + SCORE.SCISSORS],
 ]);
 
 const winLoseStrategyScoreMap = new Map<string, number>([
-  ["A,X", 0 + 3],
-  ["A,Y", 3 + 1],
-  ["A,Z", 6 + 2],
-  ["B,X", 0 + 1],
-  ["B,Y", 3 + 2],
-  ["B,Z", 6 + 3],
-  ["C,X", 0 + 2],
-  ["C,Y", 3 + 3],
-  ["C,Z", 6 + 1],
+  ["A X", SCORE.L + SCORE.SCISSORS],
+  ["A Y", SCORE.D + SCORE.ROCK],
+  ["A Z", SCORE.W + SCORE.PAPER],
+  ["B X", SCORE.L + SCORE.ROCK],
+  ["B Y", SCORE.D + SCORE.PAPER],
+  ["B Z", SCORE.W + SCORE.SCISSORS],
+  ["C X", SCORE.L + SCORE.PAPER],
+  ["C Y", SCORE.D + SCORE.SCISSORS],
+  ["C Z", SCORE.W + SCORE.ROCK],
 ]);
 
-const calculateScore = (
-  scoreMap: Map<string, number>,
-): ((rounds: string[][]) => number) =>
-  F.flow(
-    A.map((round) => round.join()),
-    A.map((round) => map.lookup(string.Eq)(round, scoreMap)),
+const toScore =
+  (scoreMap: Map<string, number>) =>
+  (round: string): O.Option<number> =>
+    F.pipe(scoreMap, map.lookup(S.Eq)(round));
+
+const part1 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
+    A.map(toScore(simpleStrategyScoreMap)),
     A.compact,
     monoid.concatAll(N.MonoidSum),
   );
 
-const part1 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  return calculateScore(simpleStrategyScoreMap)(input);
-};
-
-const part2 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  return calculateScore(winLoseStrategyScoreMap)(input);
-};
+const part2 = (rawInput: string) =>
+  F.pipe(
+    rawInput,
+    parseInput,
+    A.map(toScore(winLoseStrategyScoreMap)),
+    A.compact,
+    monoid.concatAll(N.MonoidSum),
+  );
 
 run({
   part1: {
