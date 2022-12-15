@@ -25,7 +25,7 @@
 [![Day](https://badgen.net/badge/12/%E2%98%85%E2%98%85/green)](src/day12)
 [![Day](https://badgen.net/badge/13/%E2%98%85%E2%98%85/green)](src/day13)
 [![Day](https://badgen.net/badge/14/%E2%98%85%E2%98%85/green)](src/day14)
-![Day](https://badgen.net/badge/15/%E2%98%86%E2%98%86/gray)
+[![Day](https://badgen.net/badge/15/%E2%98%85%E2%98%85/green)](src/day15)
 ![Day](https://badgen.net/badge/16/%E2%98%86%E2%98%86/gray)
 ![Day](https://badgen.net/badge/17/%E2%98%86%E2%98%86/gray)
 ![Day](https://badgen.net/badge/18/%E2%98%86%E2%98%86/gray)
@@ -69,30 +69,30 @@ pnpm start 1
 
 ```
 Day 01
-Time part 1: 0.401ms
-Time part 2: 0.419ms
-Both parts: 0.82ms
+Time part 1: 0.484ms
+Time part 2: 0.354ms
+Both parts: 0.838ms
 ```
 
 ```
 Day 02
-Time part 1: 3.6ms
-Time part 2: 3.002ms
-Both parts: 6.602ms
+Time part 1: 3.139ms
+Time part 2: 1.833ms
+Both parts: 4.973ms
 ```
 
 ```
 Day 03
-Time part 1: 1.786ms
-Time part 2: 1.226ms
-Both parts: 3.013ms
+Time part 1: 2.514ms
+Time part 2: 0.786ms
+Both parts: 3.3ms
 ```
 
 ```
 Day 04
-Time part 1: 6.537ms
-Time part 2: 4.168ms
-Both parts: 10.705ms
+Time part 1: 6.149ms
+Time part 2: 4.588ms
+Both parts: 10.736ms
 ```
 
 ```
@@ -104,16 +104,16 @@ Both parts: 37.488ms
 
 ```
 Day 06
-Time part 1: 9.056ms
-Time part 2: 69.34ms
-Both parts: 78.396ms
+Time part 1: 5.819ms
+Time part 2: 8.194ms
+Both parts: 14.013ms
 ```
 
 ```
 Day 07
-Time part 1: 8.651ms
-Time part 2: 3.085ms
-Both parts: 11.736ms
+Time part 1: 4.896ms
+Time part 2: 3.992ms
+Both parts: 8.889ms
 ```
 
 ```
@@ -125,23 +125,23 @@ Both parts: 431.921ms
 
 ```
 Day 09
-Time part 1: 68.352ms
-Time part 2: 287.039ms
-Both parts: 355.39ms
+Time part 1: 396.979ms
+Time part 2: 664.027ms
+Both parts: 1061.006ms
 ```
 
 ```
 Day 10
-Time part 1: 0.178ms
-Time part 2: 0.614ms
-Both parts: 0.793ms
+Time part 1: 0.206ms
+Time part 2: 0.288ms
+Both parts: 0.494ms
 ```
 
 ```
 Day 11
-Time part 1: 1.677ms
-Time part 2: 69.541ms
-Both parts: 71.218ms
+Time part 1: 0.42ms
+Time part 2: 58.017ms
+Both parts: 58.437ms
 ```
 
 ```
@@ -160,16 +160,16 @@ Both parts: 81.76ms
 
 ```
 Day 14
-Time part 1: 50.734ms
-Time part 2: 953.367ms
-Both parts: 1004.101ms
+Time part 1: 52.238ms
+Time part 2: 1340.348ms
+Both parts: 1392.585ms
 ```
 
 ```
 Day 15
-Time part 1: -
-Time part 2: -
-Both parts: -
+Time part 1: 0.594ms
+Time part 2: 56939.424ms
+Both parts: 56940.017ms
 ```
 
 ```
@@ -243,8 +243,8 @@ Both parts: -
 ```
 
 ```
-Total stars: 28/50
-Total time: 23457.894ms
+Total stars: 30/50
+Total time: 81410.408ms
 ```
 
 <!--/RESULTS-->
